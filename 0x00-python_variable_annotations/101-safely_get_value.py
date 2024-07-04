@@ -13,10 +13,10 @@ T = TypeVar('T')
 
 
 def safely_get_value(
-    dct: Mapping[Any, T],
+    dct: Mapping,
     key: Any,
     default: Union[T, None] = None
-) -> Union[T, None]:
+) -> Union[Any, T]:
     """
     Attempt to retrieve a value from a mapping using a key,
     or return a default value.
@@ -31,4 +31,7 @@ def safely_get_value(
         Union[T, None]: The value associated with
         the key, or the default value.
     """
-    return dct.get(key, default)
+    if key in dct:
+        return dct[key]
+    else:
+        return default
