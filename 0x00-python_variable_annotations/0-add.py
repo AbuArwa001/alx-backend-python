@@ -3,6 +3,7 @@
 Module to add floats
 """
 
+
 def add(a: float, b: float) -> float:
     """
     Function that adds float
