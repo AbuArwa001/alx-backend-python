@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-from typing import List
-
 """
 Module to define a function that calculates the sum of
 all elements in a list of floats.
 """
+from typing import List
 
 
 def sum_list(input_list: List[float]) -> float:
