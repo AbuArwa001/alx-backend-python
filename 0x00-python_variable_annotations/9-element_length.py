@@ -5,7 +5,8 @@ that takes a sequence of sequences
 and returns a list of tuples, each
 containing a sequence and its corresponding length.
 """
-from typing import  Sequence, Tuple, List, Iterable
+
+from typing import List, Tuple, Sequence, Iterable
 
 
 def element_length(lst: Iterable[Sequence]) -> List[Tuple[Sequence, int]]:
