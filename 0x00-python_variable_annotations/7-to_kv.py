@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-This module provides a utility function to_kv that takes a key and a value.
-The function returns a tuple with the key and the square of the value.
+This module provides a utility function 'to_kv' that takes a key (str)
+and a value (int or float).
+It returns a tuple with the key and the square of the value.
 """
+from typing import Union, Tuple
 
-from typing import Union
 
-
-def to_kv(k: str, v: Union[int, float]) -> tuple:
+def to_kv(k: str, v: Union[int, float]) -> Tuple[str, float]:
     """
     Return a tuple with the key and the square of the value.
 
@@ -17,6 +17,7 @@ def to_kv(k: str, v: Union[int, float]) -> tuple:
                                included in the tuple.
 
     Returns:
-        tuple: A tuple containing the key and the square of the value.
+        Tuple[str, float]: A tuple containing the key
+                           and the square of the value.
     """
     return (k, v**2)
