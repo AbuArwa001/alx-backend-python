@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 This module contains an asynchronous coroutine
 for demonstrating async and await syntax in Python.
@@ -24,6 +26,6 @@ async def wait_random(max_delay: int = 10) -> float:
     Returns:
         float: The actual delay in seconds.
     """
-    delay = random.uniform(0, max_delay)
+    delay: float = random.uniform(0, max_delay)
     await asyncio.sleep(delay)
     return delay
