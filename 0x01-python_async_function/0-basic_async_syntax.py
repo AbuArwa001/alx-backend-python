@@ -9,7 +9,6 @@ that waits for a random delay and returns the delay.
 Functions:
     wait_random(max_delay: int = 10) -> float
 """
-
 import asyncio
 import random
 
