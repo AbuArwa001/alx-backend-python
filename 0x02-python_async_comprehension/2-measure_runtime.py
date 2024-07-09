@@ -3,7 +3,6 @@
 This module contains a function for measuring
 the average execution time of concurrent coroutines.
 """
-
 import asyncio
 import time
 
