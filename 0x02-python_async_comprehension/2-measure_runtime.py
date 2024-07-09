@@ -1,29 +1,14 @@
 #!/usr/bin/env python3
-"""
-This module contains a function for measuring
-the average execution time of concurrent coroutines.
-"""
-
+""" Async gather """
 import asyncio
 import time
-
-async_comprehension = __import__("1-async_comprehension").async_comprehension
+async_comprehension = __import__('1-async_comprehension').async_comprehension
 
 
 async def measure_runtime() -> float:
-    """
-    Measures the total execution time for running multiple
-    instances of async_comprehension concurrently.
+    """ executes comprehension 4 times in parallel, returns runtime """
 
-    Returns:
-        float: Average execution time per task.
-    """
-    start_time: float = time.time()
-    await asyncio.gather(
-        async_comprehension(),
-        async_comprehension(),
-        async_comprehension(),
-        async_comprehension(),
-    )
-    end_time: float = time.time()
-    return end_time - start_time
+    start = time.perf_counter()
+    await asyncio.gather(*(async_comprehension() for _ in range(4)))
+    stop = time.perf_counter()
+    return stop - start
