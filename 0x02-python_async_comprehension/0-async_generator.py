@@ -3,9 +3,9 @@
 This module contains an asynchronous generator function
 that yields random values between 0 and 10.
 """
-
 import random
 import asyncio
+from typing import Generator
 
 
 async def async_generator():
