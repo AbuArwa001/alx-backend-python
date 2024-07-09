@@ -18,9 +18,9 @@ async def measure_runtime() -> float:
     Returns:
         float: Average execution time per task.
     """
-    start_time: float = time.time()
+    start_time: float = time.perf_counter()
     await asyncio.gather(
         *(async_comprehension() for _ in range(4))
     )
-    end_time: float = time.time()
+    end_time: float = time.perf_counter()
     return end_time - start_time
