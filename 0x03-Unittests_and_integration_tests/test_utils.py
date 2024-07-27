@@ -3,11 +3,8 @@
 Test module for parameterized test
 """
 import unittest
-from unittest.mock import patch, Mock, create_autospec
-# from functools import lru_cache as memoize
+from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json, memoize
-# import mock
-# import assertEqual
 from parameterized import parameterized, parameterized_class
 
 
@@ -30,6 +27,7 @@ class TestAccessNestedMap(unittest.TestCase):
 
 
 class TestGetJson(unittest.TestCase):
+    """ Test Class for wrapping with memoize """
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
