@@ -4,8 +4,8 @@ Test module for parameterized test
 """
 import unittest
 from unittest.mock import patch, Mock, create_autospec
-from functools import lru_cache as memoize
-from utils import access_nested_map, get_json
+# from functools import lru_cache as memoize
+from utils import access_nested_map, get_json, memoize
 # import mock
 # import assertEqual
 from parameterized import parameterized, parameterized_class
