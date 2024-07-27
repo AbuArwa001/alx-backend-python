@@ -3,8 +3,8 @@
 Test module for parameterized test
 """
 import unittest
-from unittest.mock import patch, Mock
-
+from unittest.mock import patch, Mock, create_autospec
+from functools import lru_cache as memoize
 from utils import access_nested_map, get_json
 # import mock
 # import assertEqual
@@ -43,3 +43,19 @@ class TestGetJson(unittest.TestCase):
 
         mock_get.assert_called_once_with(test_url)
         self.assertEqual(result, test_payload)
+
+class TestMemoize(unittest.TestCase):
+    def test_memoize(self):
+        class TestClass:
+
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+            test_class = TestClass()
+            test_class.a_property()
+            test_class.a_property() 
+            mock_method.assert_called_once()
