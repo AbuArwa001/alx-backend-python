@@ -9,12 +9,16 @@ from parameterized import parameterized, parameterized_class
 
 
 class TestAccessNestedMap(unittest.TestCase):
+    """ Test Class for nested objects
+    """
     @parameterized.expand([
         ({"a": 1}, ["a"], 1),
         ({"a": {"b": 2}}, ["a"], {"b": 2}),
         ({"a": {"b": 2}}, ["a", "b"], 2)
     ])
     def test_access_nested_map(self, nested_map, path, expected):
+        """ Test for nested objects
+        """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
@@ -22,6 +26,9 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": 1}, ("a", "b"), KeyError)
     ])
     def test_access_nested_map_exception(self, nested_map, path, expected):
+        """
+        Test for keyerrors in nested objects
+        """
         with self.assertRaises(expected):
             access_nested_map(nested_map, path)
 
@@ -34,6 +41,9 @@ class TestGetJson(unittest.TestCase):
     ])
     @patch('requests.get')
     def test_get_json(self, test_url, test_payload, mock_get):
+        """
+        Test for mocking request functions
+        """
         mock_res = Mock()
         mock_res.json.return_value = test_payload
         mock_get.return_value = mock_res
