@@ -5,7 +5,8 @@ Test module for GithubOrgClient
 import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -108,3 +109,58 @@ class TestGithubOrgClient(unittest.TestCase):
         org = GithubOrgClient("abc")
         res = org.has_license(repo, license_key)
         self.assertEqual(res, expected)
+
+
+@parameterized_class([
+    {
+        "org_payload": TEST_PAYLOAD[0][0],
+        "repos_payload": TEST_PAYLOAD[0][1],
+        "expected_repos": TEST_PAYLOAD[0][2],
+        "apache2_repos": TEST_PAYLOAD[0][3],
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    Integration test for GithubOrgClient.public_repos
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up the class for integration tests
+        """
+        cls.get_patcher = patch('requests.get',
+                                side_effect=cls.mocked_requests_get)
+        cls.mock_get = cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Tear down the class for integration tests
+        """
+        cls.get_patcher.stop()
+
+    @staticmethod
+    def mocked_requests_get(url):
+        """
+        Mocked requests.get method to return appropriate payloads
+        """
+        class MockResponse:
+            def __init__(self, json_data):
+                self.json_data = json_data
+
+            def json(self):
+                return self.json_data
+
+        if url == TEST_PAYLOAD[0][0]['repos_url']:
+            return MockResponse(TEST_PAYLOAD[0][1])
+        return MockResponse(TEST_PAYLOAD[0][0])
+
+    def test_public_repos(self):
+        """
+        Test GithubOrgClient.public_repos method
+        """
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos(), self.expected_repos)
+        self.assertEqual(client.public_repos(license="apache-2.0"),
+                         self.apache2_repos)
