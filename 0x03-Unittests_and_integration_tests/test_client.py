@@ -3,7 +3,7 @@
 Test module for GithubOrgClient
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 from parameterized import parameterized
 
@@ -19,23 +19,23 @@ class TestGithubOrgClient(unittest.TestCase):
                 "google",
                 "https://api.github.com/orgs/google",
                 {
-                    'login': 'google',
-                    'url': 'https://api.github.com/orgs/google',
-                    'name': 'Google',
-                    'email': 'opensource@google.com',
-                    'type': 'Organization'
+                    "login": "google",
+                    "url": "https://api.github.com/orgs/google",
+                    "name": "Google",
+                    "email": "opensource@google.com",
+                    "type": "Organization",
                 },
             ),
             (
                 "abc",
                 "https://api.github.com/orgs/abc",
                 {
-                    'login': 'abc',
-                    'url': 'https://api.github.com/orgs/abc',
-                    'name': 'abc',
-                    'email': 'opensource@abc.com',
-                    'type': 'Organization'
-                }
+                    "login": "abc",
+                    "url": "https://api.github.com/orgs/abc",
+                    "name": "abc",
+                    "email": "opensource@abc.com",
+                    "type": "Organization",
+                },
             ),
         ]
     )
@@ -50,3 +50,22 @@ class TestGithubOrgClient(unittest.TestCase):
         res = test_git.org
         mock_get_json.assert_called_once_with(org_url)
         self.assertEqual(res, expected)
+
+    def test_public_repos_url(self):
+        """
+        Test return value for repos_url
+        """
+        with patch(
+            "client.GithubOrgClient.org", new_callable=PropertyMock
+        ) as mock_org:
+            mock_org.return_value = {
+                "login": "abc",
+                "repos_url": "https://api.github.com/orgs/abc/repos",
+                "url": "https://api.github.com/orgs/abc",
+                "name": "abc",
+                "email": "opensource@abc.com",
+                "type": "Organization",
+            }
+            org = GithubOrgClient("abc")
+            res = org._public_repos_url
+            self.assertEqual(res, "https://api.github.com/orgs/abc/repos")
