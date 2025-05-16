@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import mysql.connector
 from decimal import Decimal
 import csv
