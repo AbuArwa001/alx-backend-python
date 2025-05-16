@@ -2,7 +2,9 @@
 from typing import Any, Dict
 
 seed = __import__('seed')
+stream_user_ages = __import__('4-stream_ages').stream_user_ages
 
+# @stream_user_ages
 def stream_users_in_batches(batch_size):
     """Generator function to stream user data from a user_data table file in batches."""
     # connect to the MySQL database
@@ -32,7 +34,7 @@ def stream_users_in_batches(batch_size):
                     'user_id': row[0],
                     'name': row[1],
                     'email': row[2],
-                    'age': row[3],
+                    'age': int(row[3]),
                 }
 
         # close the cursor and connection

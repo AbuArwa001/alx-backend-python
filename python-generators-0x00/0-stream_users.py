@@ -4,13 +4,14 @@ import os
 from typing import List, Dict, Any, Generator
 
 seed = __import__('seed')
+stream_user_ages = __import__('4-stream_ages').stream_user_ages
 
 """
 Module to stream user data from a CSV file.
 This module contains a generator function that reads user data from a CSV file
 and yields each row as a dictionary.
 """
-
+@stream_user_ages
 def stream_users()-> Generator[Any, None, None]:
     """Generator function to stream user data from a user_data table file."""
 
@@ -28,7 +29,6 @@ def stream_users()-> Generator[Any, None, None]:
 
         # get the column names from the cursor description
         column_names = [i[0] for i in cursor.description]
-        print(column_names)
 
         # iterate over the rows and yield each row as a dictionary
         for row in rows:
@@ -36,7 +36,7 @@ def stream_users()-> Generator[Any, None, None]:
                 'user_id': row[0],
                 'name': row[1],
                 'email': row[2],
-                'age': row[3],
+                'age': int(row[3]),
             }
 
         # close the cursor and connection
