@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import mysql.connector
+from decimal import Decimal
+import csv
+
 """
 This module contains functions to connect to a MySQL database,
 create a database, create a table, and insert data into the table.
@@ -74,13 +77,24 @@ def insert_data(connection, data):
     """ Insert data into the user_data table """
     try:
         cursor = connection.cursor()
-        with open(data, 'r') as file:
-            for line in file:
-                name, email ,age = line.strip().split(',')
-                cursor.execute("""
-                    INSERT INTO user_data (user_id, name, age, email)
-                    VALUES (UUID(), %s, %s, %s)
-                """, (name, age, email))
+        def insert(data):
+            with open(data, 'r') as file:
+                read_csv = csv.DictReader(file)
+                next(read_csv,None)  # Skip the header line
+                for line in read_csv:
+                    yield line
+                    # Assuming the CSV file has headers: name,email,age
+                    # and the data is in the format: name,email,age
+                    # Split the line by comma and unpack the values
+                    # name, email ,age = line.strip().split(',')
+        for line in insert(data):
+            print(line)
+            name, email ,age = line.get('name', None), line['email'], line['age']
+            age = Decimal(age)
+            cursor.execute("""
+                INSERT INTO user_data (user_id, name, age, email)
+                VALUES (UUID(), %s, %s, %s)
+            """, (name, age, email))
         connection.commit()
         print("Data inserted successfully")
     except mysql.connector.Error as err:
