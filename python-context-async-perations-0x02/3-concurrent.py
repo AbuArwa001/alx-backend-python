@@ -19,11 +19,11 @@ async def async_fetch_older_users():
         cursor = await conn.execute("SELECT * FROM users WHERE age > 40")
         rows = await cursor.fetchall()
         return rows
-async def main():
+async def fetch_concurrently():
     data = await asyncio.gather(
         async_fetch_users(),
         async_fetch_older_users()
     )
     print(data)
 
-asyncio.run(main())
+asyncio.run(fetch_concurrently())
