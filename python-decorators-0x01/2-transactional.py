@@ -36,7 +36,7 @@ def transactional(func):
         except Exception as e:
             # Rollback the transaction in case of an error
             conn.rollback()
-            raise e
+            print(f"Transaction failed: {e}")
     return wrapper
 
 
