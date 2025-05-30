@@ -17,8 +17,6 @@ Usage:
         print(users)
 """
 from datetime import datetime
-import time
-import sqlite3 
 import functools
 
 with_db_connection = __import__('1-with_db_connection').with_db_connection
