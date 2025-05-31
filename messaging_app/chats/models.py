@@ -2,34 +2,14 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Create your models here.
-class User(models.Model, AbstractBaseUser):
+
+# class User(models.Model, AbstractBaseUser):
+class User(AbstractBaseUser):
     """
     Custom user model for the messaging application.
     This model extends Django's AbstractBaseUser to provide a custom user
     model with fields for username, email, and password.
     """
-    class UserManager(BaseUserManager):
-        def create_user(self, username, email, password=None):
-            if not email:
-                raise ValueError("Users must have an email address")
-            if not username:
-                raise ValueError("Users must have a username")
-            user = self.model(
-                username=username,
-                email=self.normalize_email(email),
-            )
-            user.set_password(password)
-            user.save(using=self._db)
-            return user
-
-        def create_superuser(self, username, email, password=None):
-            user = self.create_user(username, email, password)
-            user.is_staff = True
-            user.is_superuser = True
-            user.save(using=self._db)
-            return user
-    objects = UserManager()
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
@@ -37,12 +17,7 @@ class User(models.Model, AbstractBaseUser):
     first_name = models.CharField(max_length=150, blank=True)
     phone_number = models.CharField(max_length=15, blank=True)
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    # Additional fields for user management
-    # is_active = models.BooleanField(default=True)
-    # is_staff = models.BooleanField(default=False)
-    # is_superuser = models.BooleanField(default=False)
-    # USERNAME_FIELD = 'username'
-    # REQUIRED_FIELDS = ['email']
+
     def __str__(self):
         return self.username
 
