@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
@@ -29,9 +30,16 @@ class User(models.Model, AbstractBaseUser):
             user.save(using=self._db)
             return user
     objects = UserManager()
+    # chats/models.py doesn't contain: ["", "user_id", "first_name", "last_name", "phone_number", "primary_key"]
+    
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=150, blank=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
+    user_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    # Additional fields for user management
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
