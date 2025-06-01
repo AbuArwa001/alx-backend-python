@@ -45,8 +45,8 @@ class Message(models.Model):
     message_body = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     # Foreign key to link message to a conversation and sender
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='conversations')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
 
     def __str__(self):
         return f"Message {self.id} from {self.sender.username} in Conversation {self.conversation.id}"
