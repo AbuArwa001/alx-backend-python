@@ -1,9 +1,37 @@
-from django.shortcuts import render
+from django_filters import rest_framework as filters
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from .models import User, Conversation, Message
 from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
 
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            'username': ['exact', 'icontains'],
+            'email': ['exact', 'icontains'],
+            'date_joined': ['exact', 'gte', 'lte'],
+        }
+
+class ConversationFilter(filters.FilterSet):
+    class Meta:
+        model = Conversation
+        fields = {
+            'name': ['exact', 'icontains'],
+            'created_at': ['exact', 'gte', 'lte'],
+            'participants': ['exact'],
+        }
+
+class MessageFilter(filters.FilterSet):
+    class Meta:
+        model = Message
+        fields = {
+            'content': ['exact', 'icontains'],
+            'timestamp': ['exact', 'gte', 'lte'],
+            'sender': ['exact'],
+            'conversation': ['exact'],
+        }
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -12,6 +40,8 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = UserFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -70,6 +100,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = ConversationFilter
 
     def get_queryset(self):
         """
@@ -143,6 +175,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = MessageFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
