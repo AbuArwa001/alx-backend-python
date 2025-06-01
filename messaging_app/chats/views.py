@@ -1,5 +1,5 @@
-from django_filters import rest_framework as filters
-# from django_filters.rest_framework import filters
+from django_filters import rest_framework as filter
+from django_filters.rest_framework import filters
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from .models import User, Conversation, Message
@@ -10,7 +10,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from django.contrib.auth import authenticate
 
-class UserFilter(filters.FilterSet):
+class UserFilter(filter.FilterSet):
     class Meta:
         model = User
         fields = {
@@ -19,7 +19,7 @@ class UserFilter(filters.FilterSet):
             'date_joined': ['exact', 'gte', 'lte'],
         }
 
-class ConversationFilter(filters.FilterSet):
+class ConversationFilter(filter.FilterSet):
     class Meta:
         model = Conversation
         fields = {
@@ -28,12 +28,12 @@ class ConversationFilter(filters.FilterSet):
             'participants': ['exact'],
         }
 
-class MessageFilter(filters.FilterSet):
+class MessageFilter(filter.FilterSet):
     class Meta:
         model = Message
         fields = {
-            'content': ['exact', 'icontains'],
-            'timestamp': ['exact', 'gte', 'lte'],
+            'message_body': ['exact', 'icontains'],
+            'sent_at': ['exact', 'gte', 'lte'],
             'sender': ['exact'],
             'conversation': ['exact'],
         }
@@ -45,7 +45,8 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend]
+    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = UserFilter
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering_fields = ['username', 'email', 'date_joined']
@@ -191,7 +192,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    filter_backends = [filters.DjangoFilterBackend]
+    filter_backends = [filter.DjangoFilterBackend]
     filterset_class = ConversationFilter
 
     def get_queryset(self):
@@ -266,7 +267,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    filter_backends = [filters.DjangoFilterBackend]
+    filter_backends = [filter.DjangoFilterBackend]
     filterset_class = MessageFilter
 
     def create(self, request, *args, **kwargs):
