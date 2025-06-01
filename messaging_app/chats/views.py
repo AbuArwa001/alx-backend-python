@@ -71,6 +71,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
 
+    def get_queryset(self):
+        """
+        Override the default queryset to filter conversations based on the authenticated user.
+        """
+        user = self.request.user
+        if user.is_authenticated:
+            return Conversation.objects.filter(participants=user)
+        return Conversation.objects.none()
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
