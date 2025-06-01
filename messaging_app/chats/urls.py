@@ -2,15 +2,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import UserViewSet, ConversationViewSet, MessageViewSet
 
-urlpatterns = [
-    path('users/', UserViewSet.as_view({'get': 'list', 'post': 'create'}), name='user-list'),
-    path('users/<uuid:pk>/', UserViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='user-detail'),
-    path('conversations/', ConversationViewSet.as_view({'get': 'list', 'post': 'create'}), name='conversation-list'),
-    path('conversations/<uuid:pk>/', ConversationViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='conversation-detail'),
-    path('messages/', MessageViewSet.as_view({'get': 'list', 'post': 'create'}), name='message-list'),
-    path('messages/<uuid:pk>/', MessageViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='message-detail'),
-]
-
+urlpatterns = []
+# This file defines the URL patterns for the messaging application.
+# It includes routes for user management, conversation handling, and message operations.
+# The urlpatterns list is initialized as empty and will be populated with paths for the API endpoints.
+# Import necessary modules and viewsets for routing
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
