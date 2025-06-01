@@ -142,23 +142,17 @@ class UserViewSet(viewsets.ModelViewSet):
             return queryset.filter(pk=self.request.user.pk)
             
         return queryset
-
-class AuthViewSet(viewsets.ModelViewSet):
+class AuthViewSet(viewsets.ViewSet):  # Changed from ModelViewSet to ViewSet
     """
-    A ViewSet for handling authentication (login/logout).
-    Note: We're using ModelViewSet but only implementing login functionality.
+    Custom authentication endpoints that return user data along with tokens.
     """
     serializer_class = LoginSerializer
     permission_classes = []  # No permissions required for login
     
-    # Disable standard CRUD operations
-    def get_queryset(self):
-        return User.objects.none()  # Return empty queryset
-    
     @action(detail=False, methods=['post'])
     def login(self, request):
         """
-        Custom login action that returns an auth token.
+        Custom login that returns both token and user data.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -184,11 +178,12 @@ class AuthViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def logout(self, request):
         """
-        Custom logout action that deletes the auth token.
+        Custom logout that clears the token.
         """
         if request.user.is_authenticated:
             Token.objects.filter(user=request.user).delete()
         return Response({'status': 'logged out'})
+
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing conversations in the messaging application.
