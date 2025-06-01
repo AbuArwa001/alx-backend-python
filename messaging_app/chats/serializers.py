@@ -1,23 +1,41 @@
 from .models import User, Conversation, Message
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 
 
-class UserSerializer(serializers.Serializer):
-    """
-    Serializer for the User model.
-    Converts User instances to and from JSON format.
-    """
-    user_id = serializers.UUIDField(read_only=True)
-    username = serializers.CharField(max_length=150, required=True, allow_blank=False)
-    email = serializers.EmailField(max_length=255, required=True, allow_blank=False)
-    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    phone_number = serializers.CharField(max_length=15, required=False, allow_blank=True)
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
     class Meta:
         model = User
-        fields = ['user_id', 'username', 'email', 'first_name', 'last_name', 'phone_number']
-        read_only_fields = ['user_id']
+        fields = ['user_id', 'username', 'email', 'password', 
+                 'first_name', 'last_name', 'phone_number', 'date_joined']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'user_id': {'read_only': True},
+            'date_joined': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            phone_number=validated_data.get('phone_number', '')
+        )
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Incorrect Credentials")
 
 
 

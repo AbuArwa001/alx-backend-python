@@ -1,16 +1,21 @@
 from django_filters import rest_framework as filters
+# from django_filters.rest_framework import filters
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from .models import User, Conversation, Message
-from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
-
+from .serializers import LoginSerializer, UserSerializer, ConversationSerializer, MessageSerializer
+from rest_framework.authtoken.models import Token
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from django.contrib.auth import authenticate
 
 class UserFilter(filters.FilterSet):
     class Meta:
         model = User
         fields = {
-            'username': ['exact', 'icontains'],
-            'email': ['exact', 'icontains'],
+            'username': ['iexact', 'icontains'],
+            'email': ['iexact', 'icontains'],
             'date_joined': ['exact', 'gte', 'lte'],
         }
 
@@ -36,63 +41,154 @@ class MessageFilter(filters.FilterSet):
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing users in the messaging application.
-    Provides CRUD operations for User model.
+    Provides CRUD operations for User model with authentication and filtering.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    filter_backends = [filters.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = UserFilter
+    search_fields = ['username', 'email', 'first_name', 'last_name']
+    ordering_fields = ['username', 'email', 'date_joined']
+    ordering = ['username']
+
+    def get_permissions(self):
+        """
+        Custom permission handling:
+        - Allow anyone to create a user (register)
+        - Require authentication for updates/deletes
+        - Allow read-only access for listing/retrieval
+        """
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
 
     def create(self, request, *args, **kwargs):
+        """
+        Create a new user account (registration).
+        Automatically generates an auth token for the new user.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        
+        # Create token for the new user
+        token, created = Token.objects.get_or_create(user=user)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response({
+            'user': serializer.data,
+            'token': token.key
+        }, status=status.HTTP_201_CREATED, headers=headers)
+
     def update(self, request, *args, **kwargs):
+        """
+        Update user information.
+        Only allows users to update their own profile unless staff/superuser.
+        """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        
+        # Ensure users can only edit their own profile unless they're staff
+        if not request.user.is_staff and instance != request.user:
+            return Response(
+                {'detail': 'You can only edit your own profile.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        
         return Response(UserSerializer(user).data)
+
     def destroy(self, request, *args, **kwargs):
+        """
+        Delete a user account.
+        Only allows users to delete their own account unless staff/superuser.
+        """
         instance = self.get_object()
+        
+        # Ensure users can only delete their own account unless they're staff
+        if not request.user.is_staff and instance != request.user:
+            return Response(
+                {'detail': 'You can only delete your own account.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_destroy(self, instance):
         """
-        Delete the user instance.
+        Custom delete handling - also deletes the auth token.
         """
+        # Delete the user's token if it exists
+        Token.objects.filter(user=instance).delete()
         instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    def list(self, request, *args, **kwargs):
+
+    def get_queryset(self):
         """
-        List all users in the messaging application.
+        Custom queryset handling:
+        - Staff can see all users
+        - Regular users can only see themselves in detail view
+        - Everyone can see all users in list view (if permissions allow)
         """
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-    def retrieve(self, request, *args, **kwargs):
+        queryset = super().get_queryset()
+        
+        # For detail views, non-staff can only see themselves
+        if self.action == 'retrieve' and not self.request.user.is_staff:
+            return queryset.filter(pk=self.request.user.pk)
+            
+        return queryset
+
+class AuthViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet for handling authentication (login/logout).
+    Note: We're using ModelViewSet but only implementing login functionality.
+    """
+    serializer_class = LoginSerializer
+    permission_classes = []  # No permissions required for login
+    
+    # Disable standard CRUD operations
+    def get_queryset(self):
+        return User.objects.none()  # Return empty queryset
+    
+    @action(detail=False, methods=['post'])
+    def login(self, request):
         """
-        Retrieve a specific user by ID.
+        Custom login action that returns an auth token.
         """
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-    def get_permissions(self):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = authenticate(
+            request=request,
+            email=serializer.validated_data['email'],
+            password=serializer.validated_data['password']
+        )
+        
+        if not user:
+            return Response(
+                {'error': 'Invalid Credentials'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'user': UserSerializer(user).data,
+            'token': token.key
+        })
+    
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
         """
-        Get the permissions for the UserViewSet.
+        Custom logout action that deletes the auth token.
         """
-        if self.action in ['create', 'update', 'destroy']:
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-    def get_serializer_class(self):
-        """
-        Get the serializer class for the UserViewSet.
-        """
-        if self.action in ['create', 'update']:
-            return UserSerializer
-        return UserSerializer
+        if request.user.is_authenticated:
+            Token.objects.filter(user=request.user).delete()
+        return Response({'status': 'logged out'})
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing conversations in the messaging application.
