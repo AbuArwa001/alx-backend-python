@@ -1,6 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework_nested import routers
-from .views import AuthViewSet, UserViewSet, ConversationViewSet, MessageViewSet
+from .auth import AuthViewSet
+from .views import (ConversationViewSet, MessageViewSet,
+                    UserViewSet)
 
 # Initialize main router
 router = routers.DefaultRouter()

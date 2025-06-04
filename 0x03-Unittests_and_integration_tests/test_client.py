@@ -3,10 +3,11 @@
 Test module for GithubOrgClient
 """
 import unittest
-from unittest.mock import patch, PropertyMock
+from unittest.mock import PropertyMock, patch
+
 from client import GithubOrgClient
-from parameterized import parameterized, parameterized_class
 from fixtures import TEST_PAYLOAD
+from parameterized import parameterized, parameterized_class
 
 
 class TestGithubOrgClient(unittest.TestCase):

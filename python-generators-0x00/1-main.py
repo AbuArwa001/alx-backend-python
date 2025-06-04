@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from itertools import islice
+
 stream_users = __import__('0-stream_users').stream_users
 
 

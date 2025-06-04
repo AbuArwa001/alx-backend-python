@@ -6,7 +6,7 @@ the first element of a sequence without
     raising an error if the sequence is empty.
 """
 
-from typing import Union, Sequence, Any
+from typing import Any, Sequence, Union
 
 
 def safe_first_element(lst: Sequence[Any]) -> Union[Any, None]:

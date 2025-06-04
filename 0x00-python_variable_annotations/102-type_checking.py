@@ -6,7 +6,7 @@ This module provides a function that duplicates elements in a tuple
 based on a specified factor, effectively 'zooming in' on the array.
 """
 
-from typing import Tuple, List
+from typing import List, Tuple
 
 
 def zoom_array(lst: Tuple, factor: int = 2) -> List:

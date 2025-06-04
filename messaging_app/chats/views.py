@@ -1,9 +1,9 @@
 from django_filters import rest_framework as filter
-from django_filters.rest_framework import filters
+
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from .models import User, Conversation, Message
-from .serializers import LoginSerializer, UserSerializer, ConversationSerializer, MessageSerializer
+from .serializers import  UserSerializer, ConversationSerializer, MessageSerializer
 from rest_framework.authtoken.models import Token
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
@@ -143,47 +143,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return queryset.filter(pk=self.request.user.pk)
             
         return queryset
-class AuthViewSet(viewsets.ViewSet):  # Changed from ModelViewSet to ViewSet
-    """
-    Custom authentication endpoints that return user data along with tokens.
-    """
-    serializer_class = LoginSerializer
-    permission_classes = []  # No permissions required for login
-    
-    @action(detail=False, methods=['post'])
-    def login(self, request):
-        """
-        Custom login that returns both token and user data.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        user = authenticate(
-            request=request,
-            email=serializer.validated_data['email'],
-            password=serializer.validated_data['password']
-        )
-        
-        if not user:
-            return Response(
-                {'error': 'Invalid Credentials'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-            
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'user': UserSerializer(user).data,
-            'token': token.key
-        })
-    
-    @action(detail=False, methods=['post'])
-    def logout(self, request):
-        """
-        Custom logout that clears the token.
-        """
-        if request.user.is_authenticated:
-            Token.objects.filter(user=request.user).delete()
-        return Response({'status': 'logged out'})
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """
@@ -273,6 +232,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         message = serializer.save()
         return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
@@ -301,6 +261,12 @@ class MessageViewSet(viewsets.ModelViewSet):
         List all messages in the messaging application.
         """
         queryset = self.get_queryset()
+        if not request.user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        queryset = queryset.filter(conversation__participants=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 

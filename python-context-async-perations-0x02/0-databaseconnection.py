@@ -9,15 +9,16 @@ Usage:
         # Perform database operations
         pass
 """
-import sqlite3
-from contextlib import contextmanager
-from typing import Generator, Optional
 import functools
 import logging
+import sqlite3
 import time
+from contextlib import contextmanager
 from datetime import datetime
 from sqlite3 import Connection, Cursor
 from sqlite3.dbapi2 import Error
+from typing import Generator, Optional
+
 
 class DatabaseConnection:
     """Context manager for database connection."""

@@ -1,6 +1,7 @@
-from .models import User, Conversation, Message
-from rest_framework import serializers
 from django.contrib.auth import authenticate
+from rest_framework import serializers
+
+from .models import Conversation, Message, User
 
 
 class UserSerializer(serializers.ModelSerializer):

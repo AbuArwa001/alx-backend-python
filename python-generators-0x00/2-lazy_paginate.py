@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 from typing import Generator
 
-
 seed = __import__('seed')
 
 

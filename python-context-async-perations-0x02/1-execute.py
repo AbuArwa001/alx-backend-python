@@ -9,7 +9,8 @@ Usage:
 """
 
 import sqlite3
-from typing import List, Tuple, Optional, Any
+from typing import Any, List, Optional, Tuple
+
 
 class ExecuteQuery:
     """Context manager for executing parameterized SQL queries."""

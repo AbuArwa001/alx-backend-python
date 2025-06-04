@@ -3,8 +3,8 @@
 This module contains an asynchronous generator function
 that yields random values between 0 and 10.
 """
-import random
 import asyncio
+import random
 from typing import Generator
 
 

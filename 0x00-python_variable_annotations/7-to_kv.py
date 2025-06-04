@@ -4,7 +4,7 @@ This module provides a utility function 'to_kv' that takes a key (str)
 and a value (int or float).
 It returns a tuple with the key and the square of the value.
 """
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 
 def to_kv(k: str, v: Union[int, float]) -> Tuple[str, float]:

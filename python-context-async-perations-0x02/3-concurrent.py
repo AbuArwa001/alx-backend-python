@@ -2,10 +2,12 @@
 """
 3-concurrent.py
 """
-import aiosqlite
 import asyncio
 import functools
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import aiosqlite
+
 
 async def async_fetch_users():
     """Asynchronous function to fetch users from the database."""

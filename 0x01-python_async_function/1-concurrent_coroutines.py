@@ -3,8 +3,8 @@
 This module contains an asynchronous function for waiting random durations.
 """
 
-from typing import List
 import asyncio
+from typing import List
 
 wait_random = __import__('0-basic_async_syntax').wait_random
 

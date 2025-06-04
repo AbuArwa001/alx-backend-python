@@ -6,8 +6,7 @@ from a mapping using a specified key.
 If the key is not found, it returns a default value.
 """
 
-from typing import Union, Sequence, Any, Mapping, TypeVar
-
+from typing import Any, Mapping, Sequence, TypeVar, Union
 
 T = TypeVar('T')
 

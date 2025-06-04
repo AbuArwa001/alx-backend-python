@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import mysql.connector
 import os
-from typing import List, Dict, Any, Generator
+from typing import Any, Dict, Generator, List
+
+import mysql.connector
 
 seed = __import__('seed')
 stream_user_ages = __import__('4-stream_ages').stream_user_ages

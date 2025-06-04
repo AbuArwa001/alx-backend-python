@@ -16,8 +16,9 @@ Usage:
         user = get_user_by_id(user_id=1)
         print(user)
 """
-import sqlite3 
 import functools
+import sqlite3
+
 
 def with_db_connection(func):
     """ Connect to the database and pass the connection to the function. """

@@ -16,8 +16,8 @@ Usage:
         update_user_email(user_id=1,
 
 """
-import sqlite3 
 import functools
+import sqlite3
 
 with_db_connection = __import__('1-with_db_connection').with_db_connection
 

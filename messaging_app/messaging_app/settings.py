@@ -55,7 +55,9 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'chats.User' 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',  # For browser-based API usage
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -134,3 +136,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'user_id',  # Tell SimpleJWT to use 'user_id' instead of 'id'
+    'USER_ID_CLAIM': 'user_id',  # The claim name in the JWT payload
+}

@@ -1,7 +1,10 @@
-from django.db import models
 import uuid
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
+from django.db import models
 from django.utils import timezone
+
 
 class UserManager(BaseUserManager):
     """Custom manager for the User model."""

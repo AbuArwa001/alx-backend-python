@@ -5,9 +5,9 @@ Retry a function on failure.
 This script defines a decorator to retry a function on failure.
 The decorator can be applied to any function that may fail.
 """
-import time
-import sqlite3 
 import functools
+import sqlite3
+import time
 
 #### paste your with_db_decorator here
 with_db_connection = __import__('1-with_db_connection').with_db_connection

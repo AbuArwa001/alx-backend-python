@@ -16,8 +16,8 @@ Usage:
         users = fetch_users_with_cache(query="SELECT * FROM users")
         print(users)
 """
-from datetime import datetime
 import functools
+from datetime import datetime
 
 with_db_connection = __import__('1-with_db_connection').with_db_connection
 

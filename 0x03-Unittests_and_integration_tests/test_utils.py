@@ -3,9 +3,10 @@
 Test module for parameterized test
 """
 import unittest
-from unittest.mock import patch, Mock
-from utils import access_nested_map, get_json, memoize
+from unittest.mock import Mock, patch
+
 from parameterized import parameterized, parameterized_class
+from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):

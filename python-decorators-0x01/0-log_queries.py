@@ -22,10 +22,11 @@ Usage:
     users = fetch_all_users(query)
     # print(users)
 """
-import sqlite3
 import functools
+import sqlite3
 from datetime import datetime
-from logging import getLogger, StreamHandler, Formatter
+from logging import Formatter, StreamHandler, getLogger
+
 # Set up logging
 #### decorator to lof SQL queries
 

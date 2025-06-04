@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import mysql.connector
-from decimal import Decimal
 import csv
+from decimal import Decimal
+
+import mysql.connector
 
 """
 This module contains functions to connect to a MySQL database,
