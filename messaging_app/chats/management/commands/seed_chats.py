@@ -101,12 +101,12 @@ class Command(BaseCommand):
         
         # Create admin user
         admin = User.objects.create_superuser(
-            username='admin',
-            email='admin@example.com',
+            username='Admin',
+            email='admin@jmc.com',
             password='admin123',
-            first_name='Admin',
-            last_name='User',
-            phone_number='+1234567890',
+            first_name='Khalfani',
+            last_name='Athman',
+            phone_number='+254712345678',
             is_active=True,
             is_staff=True
         )
@@ -166,10 +166,8 @@ class Command(BaseCommand):
                 self.stdout.write(f'Created {i} conversations...')
         
         return conversations
-
     def create_messages(self, conversations, users):
         self.stdout.write('Creating messages...')
-        
         total_messages = 0
         
         for conversation in conversations:
@@ -184,17 +182,48 @@ class Command(BaseCommand):
                     minutes=random.randint(0, 59)
                 )
                 
-                # Create message without conversation reference
+                # Create message with conversation reference
                 message = Message.objects.create(
+                    conversation=conversation,  # This is required
                     message_body=self.faker.text(max_nb_chars=random.randint(10, 500)),
                     sent_at=sent_at,
                     sender=sender
                 )
-                
-                # Add message to conversation through M2M
-                conversation.messages.add(message)
+                # Remove the M2M add since it's not needed
+                # conversation.messages.add(message)  # This line should be removed
             
             total_messages += message_count
             self.stdout.write(f'Created {total_messages} messages...', ending='\r')
         
-        self.stdout.write('') 
+        self.stdout.write('')
+    # def create_messages(self, conversations, users):
+    #     self.stdout.write('Creating messages...')
+        
+    #     total_messages = 0
+        
+    #     for conversation in conversations:
+    #         participants = list(conversation.participants.all())
+    #         message_count = random.randint(*self.messages_per_conversation)
+            
+    #         for i in range(message_count):
+    #             sender = random.choice(participants)
+    #             sent_at = timezone.now() - timedelta(
+    #                 days=random.randint(0, 30),
+    #                 hours=random.randint(0, 23),
+    #                 minutes=random.randint(0, 59)
+    #             )
+                
+    #             # Create message without conversation reference
+    #             message = Message.objects.create(
+    #                 message_body=self.faker.text(max_nb_chars=random.randint(10, 500)),
+    #                 sent_at=sent_at,
+    #                 sender=sender
+    #             )
+                
+    #             # Add message to conversation through M2M
+    #             conversation.messages.add(message)
+            
+    #         total_messages += message_count
+    #         self.stdout.write(f'Created {total_messages} messages...', ending='\r')
+        
+    #     self.stdout.write('') 
