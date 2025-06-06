@@ -29,41 +29,17 @@ class IsParticipantOfConversation(permissions.BasePermission):
             
         # For other actions, rely on has_object_permission
         return True
-
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request: Request, view: View, obj: Conversation) -> bool:
         # Check if the user is authenticated
         if not request.user.is_authenticated:
             return False
-            
-        # For conversation objects
-        if isinstance(obj, Conversation):
-            return obj.participants.filter(id=request.user.id).exists()
-            
-        # For message objects
-        if hasattr(obj, 'conversation'):
-            return obj.conversation.participants.filter(id=request.user.id).exists()
-            
+        
+        # Allow all participants for safe methods
+        if request.method in permissions.SAFE_METHODS:
+            return obj.participants.filter(user_id=request.user.id).exists()
+        
+        # For PUT, PATCH, DELETE, check if user is participant
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            return obj.participants.filter(user_id=request.user.id).exists()
+        
         return False
-class IsChatMember(permissions.BasePermission):
-    """
-    Custom permission to only allow members of a chat to access it.
-    """
-
-    def has_permission(self, request, view):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
-        
-        # Get the chat from the view's kwargs
-        chat = view.get_object()
-        
-        # Check if the user is a member of the chat
-        return request.user in chat.members.all()
-    
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
-        
-        # Check if the user is a member of the chat
-        return request.user in obj.members.all()

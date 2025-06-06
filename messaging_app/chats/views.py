@@ -156,7 +156,6 @@ class ConversationViewSet(viewsets.ModelViewSet):
     filter_backends = [filter.DjangoFilterBackend]
     filterset_class = ConversationFilter
     permission_classes = [IsParticipantOfConversation]
-    # lookup_field = 'conversation_id'
 
     def get_queryset(self):
         """
