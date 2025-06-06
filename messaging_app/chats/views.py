@@ -5,6 +5,8 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 
 from chats.permissions import IsParticipantOfConversation
+from chats.pagination import MessagePagination
+from chats.filters import MessageFilter
 from .models import User, Conversation, Message
 from .serializers import  UserSerializer, ConversationSerializer, MessageSerializer
 from rest_framework.authtoken.models import Token
@@ -31,14 +33,6 @@ class ConversationFilter(filter.FilterSet):
             'participants': ['exact'],
         }
 
-class MessageFilter(filter.FilterSet):
-    class Meta:
-        model = Message
-        fields = {
-            'message_body': ['exact', 'icontains'],
-            'sent_at': ['exact', 'gte', 'lte'],
-            'sender': ['exact'],
-        }
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -273,6 +267,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering_fields = ['sent_at', 'sender__username']
     ordering = ['-sent_at']
     parent_lookup_field = 'conversation_id' 
+    pagination_class = MessagePagination
 
     def get_queryset(self):
         user = self.request.user
