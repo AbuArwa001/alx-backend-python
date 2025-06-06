@@ -1,87 +1,92 @@
 from rest_framework import permissions
 
+from .models import Conversation
+# Import typing for type annotations to enhance code clarity
+from typing import Optional
+from rest_framework.request import Request
+from rest_framework.views import View
 
-class IsChatParticipant(permissions.BasePermission):
-    """
-    Custom permission to only allow participants of a chat to access it.
-    """
+# class IsChatParticipant(permissions.BasePermission):
+#     """
+#     Custom permission to only allow participants of a chat to access it.
+#     """
 
-    def has_permission(self, request, view):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#     def has_permission(self, request, view):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Get the chat from the view's kwargs
-        chat = view.get_object()
+#         # Get the chat from the view's kwargs
+#         chat = view.get_object()
         
-        # Check if the user is a participant of the chat
-        return request.user in chat.participants.all()
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#         # Check if the user is a participant of the chat
+#         return request.user in chat.participants.all()
+#     def has_object_permission(self, request, view, obj):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Check if the user is a participant of the chat
-        return request.user in obj.participants.all()
-class IsChatOwner(permissions.BasePermission):
-    """
-    Custom permission to only allow the owner of a chat to access it.
-    """
+#         # Check if the user is a participant of the chat
+#         return request.user in obj.participants.all()
+# class IsChatOwner(permissions.BasePermission):
+#     """
+#     Custom permission to only allow the owner of a chat to access it.
+#     """
 
-    def has_permission(self, request, view):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#     def has_permission(self, request, view):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Get the chat from the view's kwargs
-        chat = view.get_object()
+#         # Get the chat from the view's kwargs
+#         chat = view.get_object()
         
-        # Check if the user is the owner of the chat
-        return chat.owner == request.user
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#         # Check if the user is the owner of the chat
+#         return chat.owner == request.user
+#     def has_object_permission(self, request, view, obj):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Check if the user is the owner of the chat
-        return obj.owner == request.user
-class IsSuperUser(permissions.BasePermission):
-    """
-    Custom permission to only allow superusers to access certain views.
-    """
+#         # Check if the user is the owner of the chat
+#         return obj.owner == request.user
+# class IsSuperUser(permissions.BasePermission):
+#     """
+#     Custom permission to only allow superusers to access certain views.
+#     """
 
-    def has_permission(self, request, view):
-        # Check if the user is authenticated and is a superuser
-        return request.user.is_authenticated and request.user.is_superuser
+#     def has_permission(self, request, view):
+#         # Check if the user is authenticated and is a superuser
+#         return request.user.is_authenticated and request.user.is_superuser
     
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated and is a superuser
-        return request.user.is_authenticated and request.user.is_superuser
+#     def has_object_permission(self, request, view, obj):
+#         # Check if the user is authenticated and is a superuser
+#         return request.user.is_authenticated and request.user.is_superuser
 
-class IsAdmin(permissions.BasePermission):
-    """
-    Custom permission to only allow admins of a chat to access it.
-    """
+# class IsAdmin(permissions.BasePermission):
+#     """
+#     Custom permission to only allow admins of a chat to access it.
+#     """
 
-    def has_permission(self, request, view):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#     def has_permission(self, request, view):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Get the chat from the view's kwargs
-        chat = view.get_object()
+#         # Get the chat from the view's kwargs
+#         chat = view.get_object()
         
-        # Check if the user is an admin of the chat
-        return request.user in chat.admins.all()
+#         # Check if the user is an admin of the chat
+#         return request.user in chat.admins.all()
     
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return False
+#     def has_object_permission(self, request, view, obj):
+#         # Check if the user is authenticated
+#         if not request.user.is_authenticated:
+#             return False
         
-        # Check if the user is an admin of the chat
-        return request.user in obj.admins.all()
-class IsConversationParticipant(permissions.BasePermission):
+#         # Check if the user is an admin of the chat
+#         return request.user in obj.admins.all()
+class IsParticipantOfConversation(permissions.BasePermission):
     """
     Custom permission to only allow participants of a conversation to access it.
     """
@@ -97,13 +102,18 @@ class IsConversationParticipant(permissions.BasePermission):
         # Check if the user is a member of the conversation
         return request.user in conversation.participants.all()
     
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request: Request, view: View, obj: Conversation) -> bool:
+
         # Check if the user is authenticated
         if not request.user.is_authenticated:
             return False
         
         # Check if the user is a member of the conversation
-        return request.user in obj.members.all()
+        if isinstance(obj, Conversation):
+            # Check if the user is in the conversation's participants
+            # Uses exists() for efficient database query
+            return obj.participants.filter(user_id=request.user.id).exists()
+                # return request.user in obj.members.all()
 
 class IsChatMember(permissions.BasePermission):
     """

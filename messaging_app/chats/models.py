@@ -67,12 +67,13 @@ class Conversation(models.Model):
     """
     conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=255, blank=True, null=True)
+    messages = models.ManyToManyField('Message', related_name='conversations', blank=True)
     # Many-to-many relationship with User model to allow multiple participants
     participants = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Conversation {self.id} with {self.participants.count()} participants"
+        return f"Conversation {self.conversation_id} with {self.participants.count()} participants"
 
 class Message(models.Model):
     """
@@ -83,7 +84,7 @@ class Message(models.Model):
     message_body = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     # Foreign key to link message to a conversation and sender
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='conversations')
+    # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='conversations')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
 
     def __str__(self):

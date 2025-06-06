@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework_nested import routers
 from .auth import AuthViewSet
 from .views import (ConversationViewSet, MessageViewSet,
@@ -8,7 +8,7 @@ from .views import (ConversationViewSet, MessageViewSet,
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
-router.register(r'auth', AuthViewSet, basename='auth')
+# router.register(r'^auth', AuthViewSet, basename='auth')
 # Create nested router for messages under conversations
 conversations_router = routers.NestedDefaultRouter(
     router, r'conversations', lookup='conversation'
@@ -22,6 +22,10 @@ router.register(r'messages', MessageViewSet, basename='message')
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(conversations_router.urls)),
+    re_path(r'auth/', include('djoser.urls')),
+    re_path(r'auth/', include('djoser.urls.authtoken')),
+    
+    # re_path(r'auth/', include('djoser.urls.jwt')),
 ]
 # This file defines the URL patterns for the messaging application.
 # It includes routes for user management, conversation handling, and message operations.

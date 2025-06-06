@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,17 +42,24 @@ INSTALLED_APPS = [
     'django_filters',
     "chats",  # Your app for handling messaging features
     "rest_framework.authtoken",
+    "djoser",
+    "corsheaders",  # For handling CORS headers
+
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React app running on localhost
+    ]
 AUTH_USER_MODEL = 'chats.User' 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -140,3 +148,15 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'user_id',  # Tell SimpleJWT to use 'user_id' instead of 'id'
     'USER_ID_CLAIM': 'user_id',  # The claim name in the JWT payload
 }
+SIMPLE_JWT = {
+ # Access tokens expire after 60 minutes for security
+ 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+ # Refresh tokens last 1 day, allowing session continuation
+ 'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+ # Disable refresh token rotation to simplify implementation
+ 'ROTATE_REFRESH_TOKENS': False, # Alternative: Enable for enhanced security
+ # Disable blacklisting for simplicity; enable in production for revoked tokens
+ 'BLACKLIST_AFTER_ROTATION': False,
+ # Define token header type for client requests
+ 'AUTH_HEADER_TYPES': ('Bearer',), # Standard for JWT
+ }

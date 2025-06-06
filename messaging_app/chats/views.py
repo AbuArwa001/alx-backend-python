@@ -2,6 +2,8 @@ from django_filters import rest_framework as filter
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
+
+from chats.permissions import IsParticipantOfConversation
 from .models import User, Conversation, Message
 from .serializers import  UserSerializer, ConversationSerializer, MessageSerializer
 from rest_framework.authtoken.models import Token
@@ -35,7 +37,6 @@ class MessageFilter(filter.FilterSet):
             'message_body': ['exact', 'icontains'],
             'sent_at': ['exact', 'gte', 'lte'],
             'sender': ['exact'],
-            'conversation': ['exact'],
         }
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -153,6 +154,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [filter.DjangoFilterBackend]
     filterset_class = ConversationFilter
+    permission_classes = [IsParticipantOfConversation]
 
     def get_queryset(self):
         """
@@ -227,18 +229,28 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [filter.DjangoFilterBackend]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsParticipantOfConversation]
     filterset_class = MessageFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        if request.method == 'POST' and not request.user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         message = serializer.save()
         return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        if (request.method == 'PUT' or request.method == 'PATCH' ) and not request.user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         message = serializer.save()
@@ -246,6 +258,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        if request.method == 'DELETE' and not request.user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -253,6 +270,11 @@ class MessageViewSet(viewsets.ModelViewSet):
         """
         Delete the message instance.
         """
+        if not instance.sender == self.request.user:
+            return Response(
+                {'detail': 'You can only delete your own messages.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -261,12 +283,12 @@ class MessageViewSet(viewsets.ModelViewSet):
         List all messages in the messaging application.
         """
         queryset = self.get_queryset()
-        if not request.user.is_authenticated:
+        if not request.user.is_authenticated or request.user.is_anonymous :
             return Response(
                 {'detail': 'Authentication credentials were not provided.'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        queryset = queryset.filter(conversation__participants=request.user)
+        queryset = queryset.filter(conversations__participants=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
