@@ -1,7 +1,8 @@
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import path
-
+from collections import defaultdict
+from django.http import HttpResponseForbidden
 
 class RequestLoggingMiddleware:
     """
@@ -47,15 +48,12 @@ class RestrictAccessByTimeMiddleware:
         
         # Deny access if time is NOT between 6 PM (18) and 9 PM (21)
         if not (18 <= current_hour < 21):
-            from django_restframework.views import HttpResponseForbidden
+
             return HttpResponseForbidden("Access is only allowed between 6 PM and 9 PM.")
         
         response = self.get_response(request)
         return response
 
-from django.http import HttpResponseForbidden
-from datetime import datetime, timedelta
-from collections import defaultdict
 
 class OffensiveLanguageMiddleware:
     """
@@ -69,7 +67,6 @@ class OffensiveLanguageMiddleware:
         self.message_counts = defaultdict(list)  # {ip: [timestamp1, timestamp2,...]}
         self.limit = 5  # Max messages
         self.time_window = 60  # Seconds (1 minute)
-
     def __call__(self, request):
         if request.method == 'POST':
             ip_address = request.META.get('REMOTE_ADDR') or 'unknown'
