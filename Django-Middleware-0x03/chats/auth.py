@@ -9,6 +9,11 @@ from .serializers import LoginSerializer
 
 # from .models import User, Conversation, Message
 from .serializers import LoginSerializer, UserSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+ # Import JWT view for token issuance
+from rest_framework_simplejwt.views import TokenObtainPairView
+ # Import typing for type annotations
+from typing import Dict, Any
 
 
 class AuthViewSet(viewsets.ViewSet):  # Changed from ModelViewSet to ViewSet
@@ -52,3 +57,20 @@ class AuthViewSet(viewsets.ViewSet):  # Changed from ModelViewSet to ViewSet
         if request.user.is_authenticated:
             Token.objects.filter(user=request.user).delete()
         return Response({'status': 'logged out'})
+
+ # Customize token serializer to include additional user data
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user) -> Dict[str, Any]:
+        # Get base token with standard claims (e.g., user_id)
+        token = super().get_token(user)
+        # Add username to token payload for client-side use
+        token['email'] = user.email # Alternative: Add roles or email
+        # Return modified token
+        return token
+
+ # Custom view to use the extended serializer
+class CustomTokenObtainPairView(TokenObtainPairView):
+    # Link serializer to handle custom token generation
+    serializer_class = CustomTokenObtainPairSerializer

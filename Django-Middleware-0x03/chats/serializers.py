@@ -79,11 +79,12 @@ class ConversationSerializer(serializers.Serializer):
         """
         Return the total number of messages in the conversation.
         """
+        print(f"Calculating total messages for conversation {obj}")
         return obj.messages.count()
     
     class Meta:
         model = Conversation
-        fields = ['conversation_id', 'name', 'participants']
+        fields = ['conversation_id', 'name', 'participants', 'messages', 'total_messages']
         read_only_fields = ['conversation_id']
         extra_kwargs = {
             'name': {'required': False, 'allow_blank': True},

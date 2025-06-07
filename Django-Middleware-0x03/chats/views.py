@@ -1,7 +1,12 @@
+from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filter
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
+
+from chats.permissions import IsParticipantOfConversation
+from chats.pagination import MessagePagination
+from chats.filters import MessageFilter
 from .models import User, Conversation, Message
 from .serializers import  UserSerializer, ConversationSerializer, MessageSerializer
 from rest_framework.authtoken.models import Token
@@ -28,15 +33,6 @@ class ConversationFilter(filter.FilterSet):
             'participants': ['exact'],
         }
 
-class MessageFilter(filter.FilterSet):
-    class Meta:
-        model = Message
-        fields = {
-            'message_body': ['exact', 'icontains'],
-            'sent_at': ['exact', 'gte', 'lte'],
-            'sender': ['exact'],
-            'conversation': ['exact'],
-        }
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -153,6 +149,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [filter.DjangoFilterBackend]
     filterset_class = ConversationFilter
+    permission_classes = [IsParticipantOfConversation]
 
     def get_queryset(self):
         """
@@ -219,79 +216,100 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'update']:
             return ConversationSerializer
         return ConversationSerializer
+# class MessageViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet for managing messages in the messaging application.
+#     Provides CRUD operations for Message model.
+#     """
+#     queryset = Message.objects.all()
+#     serializer_class = MessageSerializer
+#     filter_backends = [filter.DjangoFilterBackend]
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsParticipantOfConversation]
+#     filterset_class = MessageFilter
+#     search_fields = ['message_body', 'sender__username', 'conversation__name']
+#     ordering_fields = ['sent_at', 'sender__username']
+#     ordering = ['-sent_at']
+#     def get_queryset(self):
+#         """
+#         Override the default queryset to filter messages based on:
+#         - Authenticated user's conversations
+#         - Optional conversation_id parameter
+#         """
+#         queryset = super().get_queryset()
+#         user = self.request.user
+        
+#         if user.is_authenticated:
+#             # Get conversation_id from query params if available
+#             conversation_id = self.request.query_params.get('conversations_id')
+            
+#             if conversation_id:
+#                 print(f"Filtering messages for conversation_id: {conversation_id}")
+#                 # Filter messages for specific conversation where user is participant
+#                 queryset = Message.objects.filter(
+#                     conversations__id=conversation_id,
+#                     conversations__participants=user
+#                 )
+#             else:
+#                 # Filter all messages from conversations where user is participant
+#                 queryset = Message.objects.filter(
+#                     conversations__participants=user
+#                 )
+#         else:
+#             queryset = Message.objects.none()
+            
+#         return queryset
 class MessageViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing messages in the messaging application.
-    Provides CRUD operations for Message model.
-    """
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [filter.DjangoFilterBackend]
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAuthenticatedOrReadOnly, IsParticipantOfConversation]
     filterset_class = MessageFilter
+    search_fields = ['message_body', 'sender__username', 'conversation__name']
+    ordering_fields = ['sent_at', 'sender__username']
+    ordering = ['-sent_at']
+    parent_lookup_field = 'conversation_id' 
+    pagination_class = MessagePagination
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return Message.objects.none()
+            
+        # For nested routes (conversation/messages/)
+        if 'conversation_pk' in self.kwargs:
+            return Message.objects.filter(
+                conversation_id=self.kwargs['conversation_pk'],
+                conversation__participants=user
+            ).select_related('sender', 'conversation')
+            
+        # For standalone messages endpoint
+        conversation_id = self.request.query_params.get('conversation_id')
+        if conversation_id:
+            return Message.objects.filter(
+                conversation_id=conversation_id,
+                conversation__participants=user
+            ).select_related('sender', 'conversation')
+            
+        # All messages from user's conversations
+        return Message.objects.filter(
+            conversation__participants=user
+        ).select_related('sender', 'conversation')
 
-        message = serializer.save()
-        return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        message = serializer.save()
-        return Response(MessageSerializer(message).data)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        """
-        Delete the message instance.
-        """
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def list(self, request, *args, **kwargs):
-        """
-        List all messages in the messaging application.
-        """
-        queryset = self.get_queryset()
-        if not request.user.is_authenticated:
-            return Response(
-                {'detail': 'Authentication credentials were not provided.'},
-                status=status.HTTP_401_UNAUTHORIZED
+    def perform_create(self, serializer):
+        # For nested routes
+        if 'conversation_pk' in self.kwargs:
+            conversation = get_object_or_404(
+                Conversation,
+                pk=self.kwargs['conversation_pk'],
+                participants=self.request.user
             )
-        queryset = queryset.filter(conversation__participants=request.user)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieve a specific message by ID.
-        """
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def get_permissions(self):
-        """
-        Get the permissions for the MessageViewSet.
-        """
-        if self.action in ['create', 'update', 'destroy']:
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-
-    def get_serializer_class(self):
-        """
-        Get the serializer class for the MessageViewSet.
-        """
-        if self.action in ['create', 'update']:
-            return MessageSerializer
-        return MessageSerializer
-
-
+            serializer.save(sender=self.request.user, conversation=conversation)
+        else:
+            # For standalone endpoint
+            conversation_id = serializer.validated_data.get('conversation_id')
+            conversation = get_object_or_404(
+                Conversation,
+                pk=conversation_id,
+                participants=self.request.user
+            )
+            serializer.save(sender=self.request.user, conversation=conversation)
+            
