@@ -2,7 +2,8 @@
 from datetime import datetime, timedelta
 from os import path
 from collections import defaultdict
-from django.http import HttpResponseForbidden
+from rest_framework import status
+from rest_framework.response import Response
 
 class RequestLoggingMiddleware:
     """
@@ -48,8 +49,8 @@ class RestrictAccessByTimeMiddleware:
         
         # Deny access if time is NOT between 6 PM (18) and 9 PM (21)
         if not (18 <= current_hour < 21):
-
-            return HttpResponseForbidden("Access is only allowed between 6 PM and 9 PM.")
+            content = "Access is only allowed between 6 PM and 9 PM."
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
         
         response = self.get_response(request)
         return response
@@ -80,9 +81,8 @@ class OffensiveLanguageMiddleware:
             
             # Check if limit exceeded
             if len(self.message_counts[ip_address]) >= self.limit:
-                return HttpResponseForbidden(
-                    "Message rate limit exceeded (5 messages per minute). Please wait."
-                )
+                content = "Message rate limit exceeded (5 messages per minute). Please wait."
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
             
             # Record new message
             self.message_counts[ip_address].append(current_time)
@@ -90,3 +90,35 @@ class OffensiveLanguageMiddleware:
 
         response = self.get_response(request)
         return response
+
+from django.contrib.auth.models import User
+
+class RolePermissionMiddleware:
+    """
+    Middleware to restrict access to resources based on user roles.
+    Checks the user's role from the request and allows access only to authorized roles.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.allowed_roles = ['admin', 'moderator']  # Customize allowed roles here
+
+    def __call__(self, request):
+        # Skip permission check for these paths (optional)
+        if request.path.startswith('/public/'):
+            return self.get_response(request)
+            
+        # Check authentication and permissions
+        if not request.user.is_authenticated:
+            content = "Authentication required to access this resource."
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+
+        # Get user role (assuming it's stored in user.profile.role or similar)
+        user_role = getattr(request.user, 'role', None)
+        
+        # Check if user has any of the allowed roles
+        if user_role not in self.allowed_roles:
+            content = "You don't have permission to access this resource. " +\
+                f"Required roles: {', '.join(self.allowed_roles)}"
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
+        
+        return self.get_response(request)
