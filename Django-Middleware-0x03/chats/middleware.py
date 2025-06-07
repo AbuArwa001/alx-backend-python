@@ -52,3 +52,44 @@ class RestrictAccessByTimeMiddleware:
         
         response = self.get_response(request)
         return response
+
+from django.http import HttpResponseForbidden
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+class OffensiveLanguageMiddleware:
+    """
+    Middleware to limit message rates per IP address.
+    Tracks POST requests (messages) from each IP and enforces:
+    - Max 5 messages per minute
+    - Blocks further messages with 403 if limit exceeded
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.message_counts = defaultdict(list)  # {ip: [timestamp1, timestamp2,...]}
+        self.limit = 5  # Max messages
+        self.time_window = 60  # Seconds (1 minute)
+
+    def __call__(self, request):
+        if request.method == 'POST':
+            ip_address = request.META.get('REMOTE_ADDR') or 'unknown'
+            current_time = datetime.now()
+            
+            # Clean up old timestamps for this IP
+            self.message_counts[ip_address] = [
+                ts for ts in self.message_counts[ip_address]
+                if (current_time - ts).seconds < self.time_window
+            ]
+            
+            # Check if limit exceeded
+            if len(self.message_counts[ip_address]) >= self.limit:
+                return HttpResponseForbidden(
+                    "Message rate limit exceeded (5 messages per minute). Please wait."
+                )
+            
+            # Record new message
+            self.message_counts[ip_address].append(current_time)
+            print(f"Message from IP: {ip_address} - Count: {len(self.message_counts[ip_address])}")
+
+        response = self.get_response(request)
+        return response

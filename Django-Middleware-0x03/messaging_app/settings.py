@@ -56,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "chats.middleware.RequestLoggingMiddleware",  # Custom middleware for logging requests
     "chats.middleware.RestrictAccessByTimeMiddleware",  # Custom middleware for time-based access restriction
+    "chats.middleware.OffensiveLanguageMiddleware",  # Custom middleware for limiting Number of sms
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
