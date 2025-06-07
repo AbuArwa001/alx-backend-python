@@ -15,7 +15,6 @@ class RequestLoggingMiddleware:
         user = request.user.username if request.user.is_authenticated else 'Anonymous'
         file_name = path.join(path.dirname(__file__), 'requests.log')
         # Log the request details to a file named 'requests.log'
-        print(f"file name: {file_name}")
         with open(file_name, 'a') as log_file:
             log_file.write(f"{datetime.now()} - User: {user} - Path: {request.path}\n")
         
