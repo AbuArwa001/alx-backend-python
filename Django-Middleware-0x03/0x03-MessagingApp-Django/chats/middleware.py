@@ -103,7 +103,7 @@ class OffensiveLanguageMiddleware:
         )
 
 
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     """
     Role-based access control middleware with configurable permissions.
     """
