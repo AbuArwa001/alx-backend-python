@@ -1,0 +1,8 @@
+2025-06-07 00:26:35.713743 - User: Admin - Path: /
+2025-06-07 00:26:46.501146 - User: Admin - Path: /api/v1/conversations/
+2025-06-07 00:28:42.070489 - User: Admin - Path: /api-auth/logout/
+2025-06-07 00:28:42.117308 - User: Anonymous - Path: /api/v1/conversations/
+2025-06-07 00:28:49.520195 - User: Anonymous - Path: /api-auth/login/
+2025-06-07 00:28:59.825929 - User: Anonymous - Path: /api-auth/login/
+2025-06-07 00:29:00.583239 - User: Admin - Path: /api/v1/conversations/
+2025-06-07 00:30:06.142021 - User: Admin - Path: /api/v1/conversations/
