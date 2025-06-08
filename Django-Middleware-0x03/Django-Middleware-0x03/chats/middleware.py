@@ -100,7 +100,6 @@ class OffensiveLanguageMiddleware:
             headers={'Retry-After': str(retry_after)}
         )
 
-
 class RolepermissionMiddleware:
     """
     Role-based access control middleware with configurable permissions.
