@@ -50,7 +50,7 @@ def delete_user(request, user_id):
 
 def unread_messages_view(request):
     # Get unread messages for the current user
-    unread_messages = Message.unread_messages.filter(receiver=request.user).only('content', 'timestamp', 'sender')
+    unread_messages = Message.unread_for_user.filter(receiver=request.user).only('content', 'timestamp', 'sender')
     
     context = {
         'unread_messages': unread_messages

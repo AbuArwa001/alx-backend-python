@@ -1,11 +1,9 @@
 from django.db import models
 from chats.models import User
+from .managers import UnreadMessagesManager
 
 class Message(models.Model):
-    class UnreadMessagesManager(models.Manager):
-        def get_queryset(self):
-            return super().get_queryset().filter(read=False)
-    
+
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -15,7 +13,7 @@ class Message(models.Model):
     
     # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     objects = models.Manager()  # Default manager
-    unread_messages = UnreadMessagesManager()  # Custom manager for unread messages
+    unread = UnreadMessagesManager()  # Custom manager for unread messages
     # class Meta:
     #     ordering = ['-sent_at']
     #     indexes = [
