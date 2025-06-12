@@ -1,3 +1,28 @@
 from django.db import models
+from chats.models import User
 
-# Create your models here.
+class Message(models.Model):
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    
+    # class Meta:
+    #     ordering = ['-sent_at']
+    #     indexes = [
+    #         models.Index(fields=['conversation', 'sent_at']),
+    #         models.Index(fields=['sender']),
+    #     ]
+    
+    def __str__(self):
+        return f"Message from {self.sender} in {self.conversation}"
+
+class Notification(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.recipient} regarding message {self.message.message_id}"
