@@ -6,6 +6,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    edited = models.BooleanField(default=False)
     # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     
     # class Meta:
