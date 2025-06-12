@@ -54,7 +54,26 @@ def unread_messages_view(request):
                         .only('content', 'timestamp', 'sender')\
                         .select_related('sender')
     
+    replies = Message.objects.only('content', 'timestamp', 'sender')\
+                    .select_related('reply_to')\
+                    .prefetch_related('replies')
     context = {
-        'unread_messages': unread_messages
+        'unread_messages': unread_messages,
+        'replies': replies
     }
     return render(request, 'messages/unread.html', context)
+def replies_view(request, message_id):
+    """
+    View to display replies to a specific message.
+    """
+    try:
+        message = Message.objects.get(id=message_id)
+        replies = Message.objects.prefetch_related('replies')
+        
+        context = {
+            'message': message,
+            'replies': replies
+        }
+        return render(request, 'messages/replies.html', context)
+    except Message.DoesNotExist:
+        return render(request, 'error.html', {'message': 'Message not found.'})

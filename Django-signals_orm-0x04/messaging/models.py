@@ -10,6 +10,8 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     edited = models.BooleanField(default=False)
     read = models.BooleanField(default=False)
+    # a parent_message field (self-referential foreign key) to represent replies.
+    parent_message = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     
     # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     objects = models.Manager()  # Default manager
