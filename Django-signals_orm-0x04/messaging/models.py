@@ -27,3 +27,18 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient} regarding message {self.message.message_id}"
+
+
+class MessageHistory(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"History for message {self.message.id} at {self.timestamp}"
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['message', 'timestamp']),
+        ]
