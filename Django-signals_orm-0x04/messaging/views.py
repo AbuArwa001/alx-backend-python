@@ -8,6 +8,15 @@ from chats.models import User
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+    def get_unread_messages(self, request, *args, **kwargs):
+        """
+        Retrieve unread messages for the authenticated user.
+        """
+        user = request.user
+        unread_messages = Message.objects.filter(receiver=user, read=False)
+        serializer = self.get_serializer(unread_messages, many=True)
+        return Response(serializer.data)
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
@@ -37,3 +46,13 @@ def delete_user(request, user_id):
         return render(request, 'error.html', {'message': 'User not found.'})
     except Exception as e:
         return render(request, 'error.html', {'message': str(e)})
+
+
+def unread_messages_view(request):
+    # Get unread messages for the current user
+    unread_messages = Message.unread_messages.filter(receiver=request.user)
+    
+    context = {
+        'unread_messages': unread_messages
+    }
+    return render(request, 'messages/unread.html', context)
