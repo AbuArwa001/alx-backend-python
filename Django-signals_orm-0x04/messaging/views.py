@@ -5,6 +5,8 @@ from .models import Message, Notification, MessageHistory
 from .serializers import MessageSerializer, NotificationSerializer, MessageHistorySerializer
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from chats.models import User
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
@@ -49,6 +51,7 @@ def delete_user(request, user_id):
         return render(request, 'error.html', {'message': str(e)})
 
 
+@method_decorator(cache_page(60), name='dispatch')
 def unread_messages_view(request):
     # Get unread messages for the current user
     unread_messages = Message.unread.unread_for_user(request.user)\

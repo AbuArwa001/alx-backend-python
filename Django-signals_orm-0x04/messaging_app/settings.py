@@ -169,8 +169,8 @@ SIMPLE_JWT = {
  }
 
 CACHES = {
-   'default': {
-      'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-      'LOCATION': 'my_table_name',
-   }
+   'default': { 
+       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+       'LOCATION': 'unique-snowflake',
+    }
 }
