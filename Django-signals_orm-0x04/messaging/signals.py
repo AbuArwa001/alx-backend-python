@@ -1,7 +1,8 @@
 from django.dispatch import Signal
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, pre_save, post_delete
 from django.dispatch import receiver
-from .models import Message, Notification
+from .models import Message, MessageHistory, Notification
+from chats.models import User
 
 
 
@@ -28,3 +29,15 @@ def message_edited(sender, instance, **kwargs):
             print(f"Message edited: {instance.content} by {instance.sender} to {instance.receiver}")
         else:
             instance.edited = False
+
+@receiver(post_delete, sender=User)
+def delete_user_related_data(sender, instance, **kwargs):
+    """
+    Delete all messages, notifications, and message history related to the user being deleted.
+    Ensuring that foreign key constraints are respected during the deletion process by using CASCADE or custom signal logic.
+    """
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
+    Notification.objects.filter(recipient=instance).delete()
+    MessageHistory.objects.filter(edited_by=instance).delete()
+    print(f"All messages, notifications, and message history for user {instance.username} deleted.")
