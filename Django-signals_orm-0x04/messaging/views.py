@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Q
 from rest_framework import viewsets
 from .models import Message, Notification, MessageHistory
 from .serializers import MessageSerializer, NotificationSerializer, MessageHistorySerializer
@@ -54,7 +55,8 @@ def unread_messages_view(request):
                         .only('content', 'timestamp', 'sender')\
                         .select_related('sender')
     
-    replies = Message.objects.only('content', 'timestamp', 'sender')\
+    replies = Message.objects.filter(sender=request.user)\
+                    .only('content', 'timestamp', 'sender')\
                     .select_related('reply_to')\
                     .prefetch_related('replies')
     context = {
@@ -67,7 +69,10 @@ def replies_view(request, message_id):
     View to display replies to a specific message.
     """
     try:
-        message = Message.objects.get(id=message_id)
+        sender = Q(sender=request.user)
+        message = Message.objects.filter(id=message_id, sender=sender).select_related('sender').first()
+        if not message:
+            return render(request, 'error.html', {'message': 'Message not found or you do not have permission to view it.'})
         replies = Message.objects.prefetch_related('replies')
         
         context = {
