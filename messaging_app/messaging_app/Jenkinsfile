@@ -4,31 +4,38 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pull the code from GitHub
-                git pull 'https://github.com/AbuArwa001/alx-backend-python.git/messaging_app'
+                // Checkout the specific branch from GitHub
+                git(
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/AbuArwa001/alx-backend-python.git',
+                    branch: 'messaging_app'
+                )
             }
         }
+        
         stage('Install Dependencies') {
             steps {
                 // Install dependencies using pip
-                sh 'pip install -r requirements.txt'
+                sh 'pip install -r messaging_app/requirements.txt'
             }
         }
+        
         stage('Run Tests') {
             steps {
-                // Run tests using pytest
+                // Run tests using pytest and generate JUnit report
                 sh 'pytest --junitxml=report.xml'
             }
         }
-        stage('Generate Report') {
-            steps { 
-                // Generate a report from the test results
-                sh 'pytest --junitxml=report.xml'
-                // Archive the report
+        
+        stage('Archive Results') {
+            steps {
+                // Archive the test report
+                junit 'report.xml'
                 archiveArtifacts artifacts: 'report.xml', fingerprint: true
             }
         }
     }
+    
     post {
         always {
             // Clean up workspace after the build
@@ -37,10 +44,12 @@ pipeline {
         success {
             // Notify success
             echo 'Build succeeded!'
+            // You could add email or slack notification here
         }
         failure {
             // Notify failure
             echo 'Build failed!'
+            // You could add email or slack notification here
         }
     }
 }
