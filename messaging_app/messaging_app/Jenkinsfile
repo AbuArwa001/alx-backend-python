@@ -8,6 +8,8 @@ pipeline {
                 git(
                     credentialsId: 'github-credentials',
                     url: 'https://github.com/AbuArwa001/alx-backend-python.git',
+                    branch: 'main',
+                    changelog: true,
                 )
                 // Ensure we are on the correct branch
                 sh 'git branch --set-upstream-to=origin/main'
