@@ -8,15 +8,16 @@ pipeline {
                 git(
                     credentialsId: 'github-credentials',
                     url: 'https://github.com/AbuArwa001/alx-backend-python.git',
-                    branch: 'messaging_app'
                 )
+                // Ensure we are on the correct branch
+                sh 'git branch --set-upstream-to=origin/main'
             }
         }
         
         stage('Install Dependencies') {
             steps {
                 // Install dependencies using pip
-                sh 'pip install -r messaging_app/requirements.txt'
+                sh 'pip3 install -r messaging_app/requirements.txt'
             }
         }
         
