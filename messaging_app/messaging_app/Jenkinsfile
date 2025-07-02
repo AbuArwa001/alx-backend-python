@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pull the code from GitHub
+                git pull 'https://github.com/AbuArwa001/alx-backend-python.git/messaging_app'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                // Install dependencies using pip
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                // Run tests using pytest
+                sh 'pytest --junitxml=report.xml'
+            }
+        }
+        stage('Generate Report') {
+            steps { 
+                // Generate a report from the test results
+                sh 'pytest --junitxml=report.xml'
+                // Archive the report
+                archiveArtifacts artifacts: 'report.xml', fingerprint: true
+            }
+        }
+    }
+    post {
+        always {
+            // Clean up workspace after the build
+            cleanWs()
+        }
+        success {
+            // Notify success
+            echo 'Build succeeded!'
+        }
+        failure {
+            // Notify failure
+            echo 'Build failed!'
+        }
+    }
+}
+// This Jenkinsfile defines a pipeline that automates the process of pulling code, installing dependencies,
+// running tests, and generating a report for the messaging app. It includes stages for checking out the code,
+ // installing dependencies, running tests, and generating a report. The post section handles cleanup
+// and notifications based on the build outcome. The report is archived for later review.
+// The pipeline uses the `git` step to pull the code from GitHub, `sh` to run shell commands for installing dependencies and running tests, and `archiveArtifacts` to save the
