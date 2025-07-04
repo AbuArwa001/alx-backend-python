@@ -205,3 +205,21 @@ jobs:
           else
             echo ".github/workflows/blue_green_deployment.yml exists."
           fi
+            # Extend your GitHub Actions workflow to include a flake8 check for linting the Django project.
+            # Fail the build if any linting errors are detected.
+            # Add a step to generate code coverage reports and upload them as build artifacts.
+      - name: Run flake8
+        run: |
+            pip install flake8
+            flake8 .
+      - name: Generate code coverage report
+        run: |
+            pip install coverage
+            coverage run --source='.' manage.py test
+            coverage report
+            coverage html
+      - name: Upload code coverage report
+        uses: actions/upload-artifact@v2
+        with:
+            name: coverage-report
+

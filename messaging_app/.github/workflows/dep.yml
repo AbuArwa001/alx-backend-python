@@ -1,0 +1,74 @@
+# In dep.yaml file, Set up a GitHub Actions workflow that builds a Docker image for the messaging app.
+# Push the Docker image to Docker Hub
+# Use GitHub Actions’ secrets feature to store your Docker credentials securely
+name: Build and Push Docker Image
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image
+        run: |
+          docker build -t khalfanathman/messaging-app:latest .
+      - name: Push Docker image
+        run: |
+          docker push khalfanathman/messaging-app:latest
+      - name: Verify Docker image
+        run: |
+          docker pull khalfanathman/messaging-app:latest
+          docker images | grep khalfanathman/messaging-app
+          docker inspect khalfanathman/messaging-app:latest | grep '"RepoTags": \
+          docker inspect khalfanathman/messaging-app:latest | grep '"Created": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Size": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Architecture": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Os": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Config": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Env": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Cmd": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"ExposedPorts": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"WorkingDir": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Labels": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"StopSignal": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Healthcheck": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"OnBuild": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Shell": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"RootFS": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Layers": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Size": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"VirtualSize": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"GraphDriver": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Name": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Data": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Root": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Size": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Metadata": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Digest": ' |
+          docker inspect khalfanathman/messaging-app:latest | grep '"Platform": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"OS": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"OSVersion": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"OSFeatures": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Variant": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"BuildTime": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"DockerVersion": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Author": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Comment": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"CreatedBy": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Config": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"ExposedPorts": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Volumes": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"WorkingDir": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Entrypoint": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Cmd": '
+          docker inspect khalfanathman/messaging-app:latest | grep '"Labels": '
